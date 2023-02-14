@@ -27,6 +27,14 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 android {
     compileSdkVersion 31
 
+    // fixes this error on build:
+    // "> 2 files found with path 'lib/arm64-v8a/libfbjni.so' from inputs:"
+    packagingOptions {
+        pickFirst 'lib/armeabi-v7a/libfbjni.so'
+        pickFirst 'lib/arm64-v8a/libfbjni.so'
+        pickFirst 'lib/x86/libfbjni.so'
+        pickFirst 'lib/x86_64/libfbjni.so'
+    }
     lintOptions {
         disable 'InvalidPackage'
     }
