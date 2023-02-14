@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -31,7 +32,9 @@ class _MyAppState extends State<MyApp> {
 
   //load your model
   Future loadModel() async {
-    String pathImageModel = "assets/models/resnet.pt";
+    String pathImageModel = "assets/models/dn-set2-d4-test-full-CPU-scripted.pt";
+    // String pathImageModel = "assets/models/dn-set2-d4-test-full-optimized-CPU.pt";
+
     String pathCustomModel = "assets/models/custom_model.pt";
     try {
       _imageModel = await PyTorchMobile.loadModel(pathImageModel);
@@ -48,10 +51,20 @@ class _MyAppState extends State<MyApp> {
         source: (Platform.isIOS ? ImageSource.gallery : ImageSource.camera),
         maxHeight: 224,
         maxWidth: 224);
+
+    const List<double> noStd = [1.0, 1.0, 1.0];
+    const List<double> noMean = [0.0, 0.0, 0.0];
     //get prediction
     //labels are 1000 random english words for show purposes
-    _imagePrediction = await _imageModel!.getImagePrediction(
-        File(image!.path), 224, 224, "assets/labels/labels.csv");
+
+    final List? objectDetectionOutput = await _imageModel!.getImagePredictionList(
+        File(image!.path), 224, 224, mean: noMean, std: noStd);
+
+    if (objectDetectionOutput == null) {
+      log("Prediction List is null. Terminating.");
+      return;
+    }
+    log('objectDetectionOutput.length is ${objectDetectionOutput.length}');
 
     setState(() {
       _image = File(image.path);

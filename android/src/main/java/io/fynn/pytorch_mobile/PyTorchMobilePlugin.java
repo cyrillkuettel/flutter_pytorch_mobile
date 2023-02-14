@@ -24,7 +24,6 @@ import java.util.ArrayList;
 /** TorchMobilePlugin */
 public class PyTorchMobilePlugin implements FlutterPlugin, MethodCallHandler {
 
-
   private MethodChannel channel;
   ArrayList<Module> modules = new ArrayList<>();
 
@@ -117,10 +116,11 @@ public class PyTorchMobilePlugin implements FlutterPlugin, MethodCallHandler {
 
         final Tensor imageInputTensor = TensorImageUtils.bitmapToFloat32Tensor(bitmap,
                 mean, std);
-
-        final Tensor imageOutputTensor = imageModule.forward(IValue.from(imageInputTensor)).toTensor();
-
+        final IValue[] outputTuple =
+                imageModule.forward(IValue.from(imageInputTensor)).toTuple();
+        final Tensor imageOutputTensor = outputTuple[0].toTensor();
         float[] scores = imageOutputTensor.getDataAsFloatArray();
+
 
         ArrayList<Float> out = new ArrayList<>();
         for(float f : scores){
