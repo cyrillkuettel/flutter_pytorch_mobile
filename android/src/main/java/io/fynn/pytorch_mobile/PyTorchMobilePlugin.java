@@ -18,36 +18,24 @@ import org.pytorch.Module;
 import org.pytorch.Tensor;
 import org.pytorch.torchvision.TensorImageUtils;
 
-// Native Loader for torchscript support
-import com.facebook.soloader.nativeloader.NativeLoader;
-import com.facebook.soloader.nativeloader.SystemDelegate;
 
 import java.util.ArrayList;
 
 /** TorchMobilePlugin */
 public class PyTorchMobilePlugin implements FlutterPlugin, MethodCallHandler {
-  
-  static {
-    if (!NativeLoader.isInitialized()) {
-      NativeLoader.init(new SystemDelegate());
-    }
-    NativeLoader.loadLibrary("pytorch_jni");
-    NativeLoader.loadLibrary("torchvision_ops");
-  }
 
+
+  private MethodChannel channel;
   ArrayList<Module> modules = new ArrayList<>();
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    final MethodChannel channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(),
-        "pytorch_mobile");
-    channel.setMethodCallHandler(new PyTorchMobilePlugin());
+
+    channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "pytorch_mobile");
+    channel.setMethodCallHandler(this);
+
   }
 
-  public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "pytorch_mobile");
-    channel.setMethodCallHandler(new PyTorchMobilePlugin());
-  }
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
@@ -221,5 +209,6 @@ public class PyTorchMobilePlugin implements FlutterPlugin, MethodCallHandler {
 
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+    channel.setMethodCallHandler(null);
   }
 }
