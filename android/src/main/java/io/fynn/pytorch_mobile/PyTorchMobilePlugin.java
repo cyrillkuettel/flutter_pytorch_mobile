@@ -18,11 +18,24 @@ import org.pytorch.Module;
 import org.pytorch.Tensor;
 import org.pytorch.torchvision.TensorImageUtils;
 
+// Native Loader for torchscript support
+import com.facebook.soloader.nativeloader.NativeLoader;
+import com.facebook.soloader.nativeloader.SystemDelegate;
 
 import java.util.ArrayList;
 
 /** TorchMobilePlugin */
 public class PyTorchMobilePlugin implements FlutterPlugin, MethodCallHandler {
+
+
+  static {
+    if (!NativeLoader.isInitialized()) {
+      NativeLoader.init(new SystemDelegate());
+    }
+    NativeLoader.loadLibrary("pytorch_jni");
+    NativeLoader.loadLibrary("torchvision_ops");
+  }
+
 
   private MethodChannel channel;
   ArrayList<Module> modules = new ArrayList<>();
